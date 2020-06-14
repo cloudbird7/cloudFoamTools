@@ -1,0 +1,90 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#                 ____    ___                       __     
+#                /\  _`\ /\_ \                     /\ \    
+#                \ \ \/\_\//\ \     ___   __  __   \_\ \   
+#                 \ \ \/_/_\ \ \   / __`\/\ \/\ \  /'_` \  
+#                  \ \ \L\ \\_\ \_/\ \L\ \ \ \_\ \/\ \L\ \ 
+#                   \ \____//\____\ \____/\ \____/\ \___,_\
+#                    \/___/ \/____/\/___/  \/___/  \/__,_ /
+#
+#                             CloudBird‘s CodeLib
+#
+#------------------------------------------------------------------------------
+#
+#       Name:         AllsingleGraph    Version:        1.0
+#       Language:     sh                UpdateDate:     20200614     
+#
+#       Description:
+#       Run postProcess tool singleGraph for a series of simulations in order
+#       Allsimu script version: 1.2.1
+#
+#       Writer:       CloudBird         cloudbird7@foxmail.com
+#
+#------------------------------------------------------------------------------
+
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+NORMAL=$(tput sgr0)
+GREEN=$(tput setaf 2; tput bold)
+RED=$(tput setaf 1)
+printRed()
+{
+     echo -e "$RED$1$NORMAL"
+} 
+printGreen()
+{
+     echo -e "$GREEN$1$NORMAL"
+}
+
+sleepForMinutes()
+{
+    ti1=`date +%M`    #获取时间戳    
+    ti2=`date +%M`
+    i=$(($ti2 - $ti1 ))
+
+    while [[ "$i" -ne "$1" ]] #等待10m执行下一条指令
+    do
+        ti2=`date +%M`
+        i=$(($ti2 - $ti1 ))
+    done
+}
+
+runASimu()
+{
+    cd $1
+    if [ $? -ne 0 ]; then
+        printRed "Skip $1"
+    else
+        rm -rf ./system/singleGraph
+        cp ../singleGraph ./system/singleGraph
+        postProcess -func singleGraph
+        mkdir ../postResult_singleGraph/$1
+        cp -r ./postProcessing/singleGraph ../postResult_singleGraph/$1
+        cd ..
+        #sleepForMinutes 1
+    fi
+}
+
+#nameArray=("cavity1" "cavity2" "cavity3")
+
+#for name in ${nameArray[@]}
+#do 
+#    printGreen "Runing simulation in  $name ..."
+#    runASimu $name
+#    echo ""
+#done
+
+noRun_files="Allsimu gnuplot AllDictList postResult"
+mkdir postResult_singleGraph
+for file in `ls $1` #注意此处这是两个反引号，表示运行系统命令
+do
+    if ! [[ "$noRun_files" =~ "$file" ]]
+    then
+        runASimu $file
+        echo ""
+    fi
+done

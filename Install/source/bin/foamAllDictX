@@ -1,0 +1,103 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#                 ____    ___                       __     
+#                /\  _`\ /\_ \                     /\ \    
+#                \ \ \/\_\//\ \     ___   __  __   \_\ \   
+#                 \ \ \/_/_\ \ \   / __`\/\ \/\ \  /'_` \  
+#                  \ \ \L\ \\_\ \_/\ \L\ \ \ \_\ \/\ \L\ \ 
+#                   \ \____//\____\ \____/\ \____/\ \___,_\
+#                    \/___/ \/____/\/___/  \/___/  \/__,_ /
+#
+#                             CloudBird‘s CodeLib
+#
+#------------------------------------------------------------------------------
+#
+#       Name:         foamAllDictX           Version:        1.0
+#       Language:     sh                UpdateDate:     20200525     
+#
+#       Description:
+#       set  the OpenFOAM case configuration in every child path a this AllDictList file 
+#
+#       Writer:       CloudBird         cloudbird7@foxmail.com
+#
+#------------------------------------------------------------------------------
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+#输出帮助信息
+usage() {
+    cat<<USAGE
+
+Usage: foamAllDictX [OPTION] 
+
+options:
+  -help     | -h         print the usage
+
+Please create a new file called \"AllDictList\" in the  root path.
+The structure of AllDictList file should be like this:
+        dictName keyName=value
+        e.g. , system/fvSchemes ddtSchemes.default=CrankNicolson 0.9"
+
+foamAllDictX will set  the OpenFOAM case configuration in every child path with this AllDictList file 
+
+
+USAGE
+}
+
+NORMAL=$(tput sgr0)
+GREEN=$(tput setaf 2; tput bold)
+
+error() {        
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do printRed "$1"; shift; done
+    usage                                              
+    exit 1                                                                    
+}  
+
+printGreen()
+ {
+     echo -e "$GREEN$1$NORMAL"
+}
+
+Allset()
+{
+    if [ ! -f "AllDictList" ]; then
+    error "Error: AllDictList file doesn't exit!"
+    fi
+
+    noRun_files="Allsimu gnuplot AllDictList"
+    for file in `ls $1` #注意此处这是两个反引号，表示运行系统命令
+    do
+        if ! [[ "$noRun_files" =~ "$file" ]]
+        then
+            printGreen "Setting  $file ..."
+            rm -rf ./$file/AllDictList
+            cp AllDictList ./$file/AllDictList
+            cd $file
+            foamDictX -s
+            cd ..
+            echo ""
+        fi
+    done
+}
+
+
+if  [ "$#" -eq 0 ]
+then
+    Allset
+fi
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage && exit 0
+        ;;
+    -*)
+        error "Error: unknown option: '$*'"
+        ;;
+    *)
+        error "Error: please input an option word as follows:"
+        ;;
+    esac
+done

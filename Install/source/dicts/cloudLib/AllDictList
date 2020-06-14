@@ -1,0 +1,26 @@
+#------------------------------------------------------------------------------
+#                 ____    ___                       __     
+#                /\  _`\ /\_ \                     /\ \    
+#                \ \ \/\_\//\ \     ___   __  __   \_\ \   
+#                 \ \ \/_/_\ \ \   / __`\/\ \/\ \  /'_` \  
+#                  \ \ \L\ \\_\ \_/\ \L\ \ \ \_\ \/\ \L\ \ 
+#                   \ \____//\____\ \____/\ \____/\ \___,_\
+#                    \/___/ \/____/\/___/  \/___/  \/__,_ /
+#
+#                             CloudBird‘s CodeLib
+#
+#------------------------------------------------------------------------------
+#
+#       Name:         AllDictList       Version:        1.0
+#       Language:     None              UpdateDate:     20200427     
+#
+#       Description:
+#       A configuration file for the tool "foamDictX"
+#
+#       Writer:       CloudBird         cloudbird7@foxmail.com
+#
+#------------------------------------------------------------------------------
+#dictName keyName=keyValue
+constant/g value=( 0 -9.81 0 )
+system/controlDict startTime=0.5
+system/fvSchemes ddtSchemes.default=CrankNicolson 0.9

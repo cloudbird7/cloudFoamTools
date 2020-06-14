@@ -1,0 +1,141 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#                 ____    ___                       __     
+#                /\  _`\ /\_ \                     /\ \    
+#                \ \ \/\_\//\ \     ___   __  __   \_\ \   
+#                 \ \ \/_/_\ \ \   / __`\/\ \/\ \  /'_` \  
+#                  \ \ \L\ \\_\ \_/\ \L\ \ \ \_\ \/\ \L\ \ 
+#                   \ \____//\____\ \____/\ \____/\ \___,_\
+#                    \/___/ \/____/\/___/  \/___/  \/__,_ /
+#
+#                             CloudBird‘s CodeLib
+#
+#------------------------------------------------------------------------------
+#
+#       Name:         cloudFoamTools          Version:        1.3
+#       Language:     sh                      UpdateDate:     20200614     
+#
+#       Description:
+#       cloudFoamTools provides some useful programs for openfoamer:
+#
+#       foamDictX: check the OpenFOAM case configuration with a AllDictList file
+#       Allsimu: perform a series of simulations in order
+#       
+#
+#       Writer:       CloudBird         cloudbird7@foxmail.com
+#
+#------------------------------------------------------------------------------
+
+usage() {
+    cat<<USAGE
+
+Usage: ./Install [OPTION]
+
+options:
+  -help     | -h         
+  -install     | -i         
+  -remove      | -r         
+  -upgrade    | -u        
+
+If some errors occur in the installation progress, please check your user permation first~
+
+USAGE
+}
+
+NORMAL=$(tput sgr0)
+GREEN=$(tput setaf 2; tput bold)
+RED=$(tput setaf 1)
+printRed()
+{
+     echo -e "$RED$1$NORMAL"
+} 
+printGreen()
+ {
+     echo -e "$GREEN$1$NORMAL"
+}
+error() {        
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do printRed "$1"; shift; done
+    usage                                              
+    exit 1                                                                    
+}  
+
+_install()
+ {
+    echo "Installing cloudFoamTolls"
+
+    echo "Copying foamDictX..."
+    cp ./source/bin/foamDictX $WM_PROJECT_DIR/bin/foamDictX ||  error "Installation  failed at current step !"
+    echo "Setting foamDictX..."
+    chmod 755 $WM_PROJECT_DIR/bin/foamDictX ||  error
+
+    echo "Copying foamAllDictX..."
+    cp ./source/bin/foamAllDictX $WM_PROJECT_DIR/bin/foamAllDictX ||  error "Installation  failed at current step !"
+    echo "Setting foamAllDictX..."
+    chmod 755 $WM_PROJECT_DIR/bin/foamAllDictX ||  error
+
+    echo "Copying foamGetX..."
+    cp ./source/bin/foamGetX $WM_PROJECT_DIR/bin/foamGetX ||  error "Installation  failed at current step !"
+    echo "Setting foamGetX..."
+    chmod 755 $WM_PROJECT_DIR/bin/foamGetX ||  error
+
+
+    echo "Copying cloudLib..."
+
+    cp -r ./source/dicts/cloudLib $FOAM_ETC/caseDicts/general ||  error "Installation  failed at current step !"
+    echo "Setting cloudLib..."
+    chmod 755 $FOAM_ETC/caseDicts/general/cloudLib/Allsimu ||  error "Installation  failed at current step !"
+    chmod 755 $FOAM_ETC/caseDicts/general/cloudLib/postLibs/Allprobes/Allprobes ||  error "Installation  failed at current step !"
+    chmod 755 $FOAM_ETC/caseDicts/general/cloudLib/postLibs/AllsingleGraph/AllsingleGraph ||  error "Installation  failed at current step !"
+    chmod 755 $FOAM_ETC/caseDicts/general/cloudLib/postLibs/AllvolAverage/AllvolAverage ||  error "Installation  failed at current step !"
+
+    printGreen "cloudFoamTolls installed successfully!"
+}
+
+_unstall()
+{
+    echo "Uninstalling cloudFoamTolls"
+    
+    echo "Deleting foamDictX..."
+    rm -rf $WM_PROJECT_DIR/bin/foamDictX
+    echo "Deleting foamAllDictX..."
+    rm -rf $WM_PROJECT_DIR/bin/foamAllDictX
+    echo "Deleting foamGetX..."
+    rm -rf $WM_PROJECT_DIR/bin/foamGetX
+    echo "Deleting foamLib..."
+    rm -rf $FOAM_ETC/caseDicts/general/cloudLib
+    echo "Uninstall accomplished!"
+}
+
+if  [ "$#" -eq 0 ]
+then
+     install
+     exit 0
+fi
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage && exit 0
+        ;;
+    -i | -install)
+        _install
+        shift 1
+        ;;
+    -r | -remove)
+        _unstall
+        shift 1
+        ;;
+    -u | -upgrade)
+        _unstall
+        _install
+        shift 1
+        ;;
+    -*)
+        error "Error: unknown option: '$*'"
+        ;;
+    *)
+        error "Error: Illegal empty options"
+        ;;
+    esac
+done

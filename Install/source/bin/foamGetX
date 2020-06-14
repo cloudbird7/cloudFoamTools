@@ -1,0 +1,104 @@
+#!/bin/bash
+#------------------------------------------------------------------------------
+#                 ____    ___                       __     
+#                /\  _`\ /\_ \                     /\ \    
+#                \ \ \/\_\//\ \     ___   __  __   \_\ \   
+#                 \ \ \/_/_\ \ \   / __`\/\ \/\ \  /'_` \  
+#                  \ \ \L\ \\_\ \_/\ \L\ \ \ \_\ \/\ \L\ \ 
+#                   \ \____//\____\ \____/\ \____/\ \___,_\
+#                    \/___/ \/____/\/___/  \/___/  \/__,_ /
+#
+#                             CloudBird‘s CodeLib
+#
+#------------------------------------------------------------------------------
+#
+#       Name:         foamGetX          Version:        1.0
+#       Language:     sh                UpdateDate:     20200614     
+#
+#       Description:
+#       Get the scripts for batch postprocessing
+#
+#       Writer:       CloudBird         cloudbird7@foxmail.com
+#
+#------------------------------------------------------------------------------
+
+#输出帮助信息
+usage() {
+    cat<<USAGE
+
+Usage: foamGetX OPTION 
+
+options:
+  -help           | -h         print the usage
+Following options are used to copy corresponding tools
+  -probes         | -p
+  -singleGraph    | -s
+  -volAverage     | -v
+USAGE
+}
+
+NORMAL=$(tput sgr0)
+GREEN=$(tput setaf 2; tput bold)
+RED=$(tput setaf 1)
+
+#定义输出红色与绿色文字的功能
+printRed()
+{
+     echo -e "$RED$1$NORMAL"
+} 
+
+printGreen()
+ {
+     echo -e "$GREEN$1$NORMAL"
+}
+
+#定义错误退出功能
+error() {        
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do printRed "$1"; shift; done
+    usage                                              
+    exit 1                                                                    
+}  
+
+
+copyFils() {        
+    for file in $(ls $1) #注意此处这是两个反引号，表示运行系统命令
+    do
+        echo "copying $file ..."
+        cp $1/$file ./$file
+    done                                                                  
+} 
+
+
+
+
+if  [ "$#" -eq 0 ]
+then
+     error "Error: you have to input at least one option"
+fi
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage && exit 0
+        ;;
+    -p | -probes)
+        copyFils $FOAM_ETC/caseDicts/general/cloudLib/postLibs/Allprobes
+        shift 1
+        ;;
+    -s | -singleGraph)
+        copyFils $FOAM_ETC/caseDicts/general/cloudLib/postLibs/AllsingelGraph
+        shift 1
+        ;;
+    -v | -volAverage)
+        copyFils $FOAM_ETC/caseDicts/general/cloudLib/postLibs/AllvolAverage
+        shift 1
+        ;;
+    -*)
+        error "Error: unknown option: '$*'"
+        ;;
+    *)
+        error "Error: please input an option word as follows:"
+        ;;
+    esac
+done
