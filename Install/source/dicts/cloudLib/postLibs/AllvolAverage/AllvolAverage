@@ -63,7 +63,7 @@ runASimu()
         rm -rf ./system/volAverage
         cp ../topoSetDict ./system/topoSetDict
         cp ../volAverage ./system/volAverage
-        postProcess -func topoSet
+        topoSet
         postProcess -func "volAverage"
         mkdir ../postResult_volAverage/$1
         cp -r ./postProcessing/volAverage ../postResult_volAverage/$1
